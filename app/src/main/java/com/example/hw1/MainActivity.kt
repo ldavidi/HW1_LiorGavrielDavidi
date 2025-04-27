@@ -74,9 +74,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun moveSpaceshipToLane(lane: Int) {
         val laneWidth = gameContainer.width / laneCount
-        val targetX = (lane * laneWidth + laneWidth / 2 - spaceship.width / 2).toFloat()
-        spaceship.animate().x(targetX).setDuration(150).start()
+        val targetLeftMargin = lane * laneWidth + laneWidth / 2 - spaceship.width / 2
+
+        val params = spaceship.layoutParams as FrameLayout.LayoutParams
+        params.leftMargin = targetLeftMargin
+        spaceship.layoutParams = params
     }
+
 
     private fun startAsteroidSpawner() {
         asteroidSpawnerRunnable = object : Runnable {
