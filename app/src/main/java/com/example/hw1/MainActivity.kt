@@ -118,15 +118,16 @@ class MainActivity : AppCompatActivity() {
         val runnable = object : Runnable {
             override fun run() {
                 if (isGamePaused) {
-                    handler.postDelayed(this, updateInterval) // Just wait until unpaused
+                    handler.postDelayed(this, updateInterval)
                     return
                 }
 
                 val elapsed = System.currentTimeMillis() - startTime
                 val progress = elapsed.toFloat() / asteroidFallDuration
-                val targetY = progress * gameContainer.height
 
-                asteroid.translationY = targetY
+                val params = asteroid.layoutParams as FrameLayout.LayoutParams
+                params.topMargin = (progress * gameContainer.height).toInt()
+                asteroid.layoutParams = params
 
                 if (checkCollisionRealtime(asteroid)) {
                     handleHit()
@@ -142,22 +143,25 @@ class MainActivity : AppCompatActivity() {
                     asteroidList.remove(asteroid)
                 }
             }
-
-    }
-
+        }
         handler.post(runnable)
     }
     private fun checkCollisionRealtime(asteroid: ImageView): Boolean {
-        val asteroidX = asteroid.x
-        val asteroidY = asteroid.y
-        val spaceshipX = spaceship.x
-        val spaceshipY = spaceship.y
+        val asteroidParams = asteroid.layoutParams as FrameLayout.LayoutParams
+        val spaceshipParams = spaceship.layoutParams as FrameLayout.LayoutParams
 
-        val collisionX = abs(asteroidX - spaceshipX) < spaceship.width * 0.6
-        val collisionY = abs(asteroidY - spaceshipY) < spaceship.height * 0.6
+        val asteroidCenterX = asteroidParams.leftMargin + asteroid.width / 2
+        val asteroidCenterY = asteroidParams.topMargin + asteroid.height / 2
+
+        val spaceshipCenterX = spaceshipParams.leftMargin + spaceship.width / 2
+        val spaceshipCenterY = gameContainer.height - spaceship.height / 2 - 100 // 100 is bottom margin
+
+        val collisionX = abs(asteroidCenterX - spaceshipCenterX) < spaceship.width * 0.6
+        val collisionY = abs(asteroidCenterY - spaceshipCenterY) < spaceship.height * 0.6
 
         return collisionX && collisionY
     }
+
 
 
     private fun handleHit() {
